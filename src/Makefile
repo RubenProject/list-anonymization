@@ -1,6 +1,6 @@
 CC = g++
 
-CompileParms = -c -Wall
+CompileParms = -c -Wall -std=c++11
 
 OBJS = graph.o main.o
 

@@ -27,12 +27,15 @@ class Graph {
         Graph();
         ~Graph();
         bool add_edges_from_file(const char* input_name);
+        void print_edges();
+        void print_node_info();
+        void print_groups();
         float edge_identification();
         float node_group_density();
     private:
         void create_node(string node_name, int& node_id);
         bool node_exists(string node_name, int& node_id);
-        void add_edge(int from, int to);
+        bool add_edge(int from, int to);
 
         vector<vector<int>> adj;
         vector<vector<int>> pred;
