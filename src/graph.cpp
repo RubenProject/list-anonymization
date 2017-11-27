@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 
 #include "graph.hpp"
 
@@ -18,6 +19,101 @@ Graph::Graph(){
 
 
 Graph::~Graph(){
+}
+
+
+void Graph::extract_features(){
+    fm.resize(adj.size());
+    for (int i = 0; i < (int)fm.size(); i++){
+        fm[i].resize(i + 1);
+    }
+    FeatureSet f;
+    for (int i = 0; i < (int)adj.size(); i++){
+        for (int j = i + 1; j < (int)adj.size(); j++){
+            if (!edge_exists(i , j)){
+                pred_fcap(f, i, j);
+                if (f.foaf)
+                    f.d = 2;
+                else
+                    f.d = dist(i, j);
+
+                fm[i][j] = f;
+
+            }
+        }
+    }
+
+}
+
+
+int Graph::bfs(int s, int g){
+    int depth = 0;
+    bool* visited = new bool[node_count];
+    for (int i = 0; i < node_count; i++)
+        visited[i] = false;
+
+    list<int> parent;
+    list<int> child;
+
+    visited[s] = true;
+    parent.push_back(s);
+
+    vector<int>::iterator i;
+
+    while(!parent.empty() && !child.empty()){
+
+        if (!parent.empty()){
+            s = parent.front();
+            parent.pop_front();
+        } else {
+            parent = child;
+            child.clear();
+            s = parent.front();
+            parent.pop();
+            depth++;
+        }
+        if (s == g)
+            return d;
+        
+        for (i = adj[s].begin(); i != adj[s].end(); ++i){
+            if (!visited[*i]){
+                visited[*i] = true;
+                child.push_back(*i);
+            }
+        }
+    }
+    return -1;
+}
+
+
+bool Graph::edge_exists(int n0, int n1){
+    if ((int)adj.size() < n0)
+        return false;
+    for (int i = 0; i < adj[n0].size(); i++){
+        if (adj[n0][j] == n1)
+            return true;
+    }
+    return false;
+}
+
+
+void Graph::pred_fcap(FeatureSet& f, int n0, int n1){
+    int cn = 0;
+    float aa = 0;
+    for (int i = 0; i < (int)adj[n0].size(); i++){
+        for (int j = 0; j < (int)adj[n1].size(); j++){
+            if (adj[n0][i] == adj[n1][j]){
+                cn++;
+                aa += (float)(1 / log10(((double)adj[n0][i].size()));
+
+            }
+        }
+    }
+    f.foaf = (bool)cn;
+    f.cn = cn;
+    f.aa = aa;
+    f.pa = adj[i].size() * adj[j].size();
+    return f;
 }
 
 
