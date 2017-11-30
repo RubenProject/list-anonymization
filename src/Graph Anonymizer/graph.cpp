@@ -4,6 +4,8 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <climits>
+#include <list>
 
 #include "graph.hpp"
 
@@ -18,35 +20,140 @@ Graph::Graph(){
 }
 
 
-Graph::~Graph(){
+
+void Graph::generate_trainingdata(){
+    string file_name_0 = string(TRAINING_DIR) 
+        + string(DATA_SET) 
+        + to_string(0) 
+        + ".in";
+    string file_name_1 = string(TRAINING_DIR) 
+        + string(DATA_SET) 
+        + to_string(1) 
+        + ".in";
+    add_edges_from_file(file_name_0.c_str());
+    extract_features();
+    add_edges_from_file(file_name_1.c_str());
+    add_labels();
+    write_features(true);
+    //clear all datastructures
+    adj.clear();
+    f_list.clear();
+    pred.clear();
+    ungrouped.clear();
+    name_id_mapping.clear();
+    id_name_mapping.clear();
+    node_group_mapping.clear();
+    group_list.clear();
+    //reset counters
+    node_count = 0;
+    edge_count = 0;
+    group_count = 0;
+    time = 0;
+}
+
+
+void Graph::add_labels(){
+    for (int i = 0; i < (int)f_list.size(); i++){
+        if(edge_exists(f_list[i].n0, f_list[i].n1)){
+                f_list[i].label = true;
+        }
+        f_list[i].label = false;
+    }
+}
+
+
+bool Graph::update(){
+    if (time == 0){
+        node_count = 0;
+        edge_count = 0;
+        group_count = 0;
+    }
+    string cur_file_name = string(TEST_DIR) 
+        + string(DATA_SET) 
+        + to_string(time) 
+        + ".in";
+    if (!add_edges_from_file(cur_file_name.c_str()))
+        return false;
+    extract_features();
+    write_features(false);
+    //RFC
+    //read prediction list
+    assign_groups();
+    time++;
+    return true;
+}
+
+
+void Graph::write_features(bool training){
+    ofstream of;
+    string file_name;
+    string line;
+    if (training){
+        file_name = string(TRAINING_DIR)
+            + "Labeled_features.in";
+        of.open(file_name.c_str(), ios::out);
+    } else {
+        file_name = string(TEST_DIR)
+            + "unlabeled_features.in";
+        of.open(file_name.c_str(), ios::out);
+    }
+    if (of.is_open()){
+        cout << "Writing features to: " << file_name << endl;
+        for (int i = 0; i < (int)f_list.size(); i++){
+            line.clear();
+            line += to_string(f_list[i].n0) ;
+            line += ", " + to_string(f_list[i].n1); 
+            line += ", " + to_string(f_list[i].foaf);
+            line += ", " + to_string(f_list[i].cn);
+            line += ", " + to_string(f_list[i].aa);
+            line += ", " + to_string(f_list[i].pa);
+            line += ", " + to_string(f_list[i].d);
+            if (training){
+                line += ", " + to_string(f_list[i].label);
+                if (f_list[i].label)
+                    cout << line << endl;
+            }
+            line += "\n";
+            of << line;
+        }
+        of.close();
+    }
 }
 
 
 void Graph::extract_features(){
-    fm.resize(adj.size());
-    for (int i = 0; i < (int)fm.size(); i++){
-        fm[i].resize(i + 1);
-    }
+    cout << "Extracting features..." << endl;
     FeatureSet f;
-    for (int i = 0; i < (int)adj.size(); i++){
-        for (int j = i + 1; j < (int)adj.size(); j++){
+    float progress = 0;
+    float last_progress = 0;
+    float step = 100.0 / node_count;
+    for (int i = 0; i < node_count; i++){
+        for (int j = i + 1; j < node_count; j++){
             if (!edge_exists(i , j)){
+                f.n0 = i;
+                f.n1 = j;
                 pred_fcap(f, i, j);
-                if (f.foaf)
+                if (f.foaf) {
                     f.d = 2;
-                else
-                    f.d = dist(i, j);
-
-                fm[i][j] = f;
-
+                }else{
+                    //f.d = bfs(i, j);
+                    f.d = -1;
+                }
+                f_list.push_back(f);
             }
         }
+        //progress counter
+        progress += step;
+        if ((int)progress > (int)last_progress + 10){
+            cout << (int)progress << "%" << endl;
+            last_progress = progress;
+        }
     }
-
 }
 
 
 int Graph::bfs(int s, int g){
+    const int max_depth = 15;
     int depth = 0;
     bool* visited = new bool[node_count];
     for (int i = 0; i < node_count; i++)
@@ -60,7 +167,7 @@ int Graph::bfs(int s, int g){
 
     vector<int>::iterator i;
 
-    while(!parent.empty() && !child.empty()){
+    while(!parent.empty() || !child.empty()){
 
         if (!parent.empty()){
             s = parent.front();
@@ -69,11 +176,13 @@ int Graph::bfs(int s, int g){
             parent = child;
             child.clear();
             s = parent.front();
-            parent.pop();
+            parent.pop_front();
             depth++;
+            if (depth > max_depth)
+                return max_depth;
         }
         if (s == g)
-            return d;
+            return depth;
         
         for (i = adj[s].begin(); i != adj[s].end(); ++i){
             if (!visited[*i]){
@@ -82,15 +191,15 @@ int Graph::bfs(int s, int g){
             }
         }
     }
-    return -1;
+    return max_depth;
 }
 
 
 bool Graph::edge_exists(int n0, int n1){
     if ((int)adj.size() < n0)
         return false;
-    for (int i = 0; i < adj[n0].size(); i++){
-        if (adj[n0][j] == n1)
+    for (int i = 0; i < (int)adj[n0].size(); i++){
+        if (adj[n0][i] == n1)
             return true;
     }
     return false;
@@ -102,18 +211,16 @@ void Graph::pred_fcap(FeatureSet& f, int n0, int n1){
     float aa = 0;
     for (int i = 0; i < (int)adj[n0].size(); i++){
         for (int j = 0; j < (int)adj[n1].size(); j++){
-            if (adj[n0][i] == adj[n1][j]){
+            if (adj[n0][i] == adj[n1][j]){//common neighbour found
                 cn++;
-                aa += (float)(1 / log10(((double)adj[n0][i].size()));
-
+                aa += (float)(1 / log10((double)adj[adj[n0][i]].size()));
             }
         }
     }
     f.foaf = (bool)cn;
     f.cn = cn;
     f.aa = aa;
-    f.pa = adj[i].size() * adj[j].size();
-    return f;
+    f.pa = adj[n0].size() * adj[n1].size();
 }
 
 
@@ -279,6 +386,7 @@ bool Graph::add_edges_from_file(const char* input_name){
     fin.open(input_name, ios::in);
 
     if (fin.is_open()){
+        cout << "reading from: " << input_name << endl;
         while (!fin.eof()){
             fin >> from_node >> to_node;
 
@@ -290,7 +398,6 @@ bool Graph::add_edges_from_file(const char* input_name){
                 create_node(to_node, to_id);
                 ungrouped.push_back(to_id);
             }
-
             add_edge(from_id, to_id);
             add_edge(to_id, from_id);
         }

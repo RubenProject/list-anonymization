@@ -1,4 +1,0 @@
-		n	f	b
-forestfire1	1000	0.3	0.25
-forestfire2	100000	0.3	0.25
-forestfire3	50000	0.3	0.25
