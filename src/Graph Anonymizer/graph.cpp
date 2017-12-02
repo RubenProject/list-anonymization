@@ -316,17 +316,21 @@ bool Graph::add_edge(int from, int to){
 }
 
 
-float Graph::edge_identification(Group s1, Group s2){
+float Graph::edge_identification(Group s1, Group s2, bool pr){
     int connections = 0;
     for (int i = 0; i < (int)s1.nodes.size(); i++){
         for (int j = 0; j < (int)s2.nodes.size(); i++){
-            if (node_group_mapping[s2.nodes[j]] != -1
-            && find(adj[s1.nodes[i]].begin(), adj[s1.nodes[i]].end(), s2.nodes[j]) != adj[s1.nodes[i]].end()){
-                connections++;
+            if (node_group_mapping[s2.nodes[j]] != -1){
+
+                if(find(adj[s1.nodes[i]].begin(), adj[s1.nodes[i]].end(), s2.nodes[j]) != adj[s1.nodes[i]].end()){
+                    connections++;
+                } else if (pr && find(pred[s1.nodes[i]].begin(), pred[s1.nodes[i]].end(), s2.nodes[j]) != pred[s1.nodes[i]].end()){
+                    connections++;
+                }
             }
         }
     }
-    return connections / (s1.nodes.size() * s2.nodes.size());
+    return (connections / 2) / (s1.nodes.size() * s2.nodes.size());
 }
 
 
@@ -345,7 +349,7 @@ bool Graph::group_density(Group s1){
         }
     }
     for (int i = 0; i < (int)connected_groups.size(); i++){
-        if (edge_identification(s1, group_list[connected_groups[i]]) < MIN_PRIVACY)
+        if (edge_identification(s1, group_list[connected_groups[i]], true) < MIN_PRIVACY)
             return false;
     }
     return true;
@@ -375,7 +379,7 @@ void Graph::assign_groups(){
             for (int i = 0; i < (int)new_groups.size() && !found; i++){
                 new_groups[i].nodes.push_back(cur);
                 node_group_mapping.push_back(new_groups[i].id);
-                if (true/*group_density(new_groups[i])*/){
+                if (group_density(new_groups[i])){
                     if (new_groups[i].nodes.size() >= GROUP_SIZE){
                         g = new_groups[i];
                         full_groups.push_back(g);

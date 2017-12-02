@@ -18,12 +18,11 @@ using namespace std;
 
 /*  TODO: final stage of grouping
  *  TODO: TEST grouping condition
- *  TODO: implement RFC
- *  TODO: add prediction to grouping condition
+ *  TODO: implement EI test
+ *  TODO: implement NG test
  *  TODO: run experiments
  *  
  *
- *  TODO: 0 edges are predicted correctly? How is this even possible..
  *  TODO: generate smaller test set...
  *
  *
@@ -57,15 +56,15 @@ class Graph {
         Graph();
 
         bool update();
-        bool add_edges_from_file(const char* input_name);
-        void assign_groups();
         void print_edges();
         void print_groups();
         void generate_trainingdata();
-        float edge_identification(Group s1, Group s2);
+        float edge_identification(Group s1, Group s2, bool pr);
         float node_group_density();
-        void extract_features();
     private:
+        void assign_groups();
+        void extract_features();
+        bool add_edges_from_file(const char* input_name);
         void create_node(string node_name, int& node_id);
         bool node_exists(string node_name, int& node_id);
         bool add_edge(int from, int to);
