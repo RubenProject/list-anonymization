@@ -54,10 +54,7 @@ void Graph::generate_trainingdata(){
 
 void Graph::add_labels(){
     for (int i = 0; i < (int)f_list.size(); i++){
-        if(edge_exists(f_list[i].n0, f_list[i].n1)){
-                f_list[i].label = true;
-        }
-        f_list[i].label = false;
+        f_list[i].label = edge_exists(f_list[i].n0, f_list[i].n1);
     }
 }
 
@@ -76,28 +73,66 @@ bool Graph::update(){
         return false;
     extract_features();
     write_features(false);
-    //RFC
-    //read prediction list
+    //wait for user input when RFC finished
+    int go;
+    cout << "input number when RFC finished" << endl;
+    cin >> go;
+    read_predictions();
     assign_groups();
+    pred.clear();
     time++;
     return true;
 }
 
 
+void Graph::add_pred_edge(int from, int to){
+    while (from >= (int)pred.size()){
+        pred.push_back(vector<int>());
+    }
+    if (find(pred[from].begin(), pred[from].end(), to) == pred[from].end()){
+        pred[from].push_back(to);
+    }
+}
+
+
+bool Graph::read_predictions(){
+    ifstream fin;
+    string file_name;
+    string line;
+    int from_id, to_id;
+    file_name = string(TEST_DIR) + "predicted_edges.in";
+    fin.open(file_name.c_str(), ios::in);
+    if (fin.is_open()){
+        cout << "reading from: " << file_name << endl;
+        while (!fin.eof()){
+            fin >> from_id >> to_id;
+
+            add_pred_edge(from_id, to_id);
+            add_pred_edge(to_id, from_id);
+        }
+        fin.close();
+        return true;
+    } else {
+        cout << "File does not exist!" << endl;
+        return false;
+    }
+}
+
+
 void Graph::write_features(bool training){
-    ofstream of;
+    ofstream fout;
     string file_name;
     string line;
     if (training){
         file_name = string(TRAINING_DIR)
-            + "Labeled_features.in";
-        of.open(file_name.c_str(), ios::out);
+            + "labeled_features.in";
+        fout.open(file_name.c_str(), ios::out);
     } else {
         file_name = string(TEST_DIR)
             + "unlabeled_features.in";
-        of.open(file_name.c_str(), ios::out);
+        fout.open(file_name.c_str(), ios::out);
     }
-    if (of.is_open()){
+    if (fout.is_open()){
         cout << "Writing features to: " << file_name << endl;
         for (int i = 0; i < (int)f_list.size(); i++){
             line.clear();
@@ -110,13 +145,11 @@ void Graph::write_features(bool training){
             line += ", " + to_string(f_list[i].d);
             if (training){
                 line += ", " + to_string(f_list[i].label);
-                if (f_list[i].label)
-                    cout << line << endl;
             }
             line += "\n";
-            of << line;
+            fout << line;
         }
-        of.close();
+        fout.close();
     }
 }
 

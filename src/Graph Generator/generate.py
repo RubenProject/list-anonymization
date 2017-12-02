@@ -11,4 +11,4 @@ for i in range(0, 11):
         node_count = g.numberOfNodes()
         j += 10
     print(node_count)
-    graphio.EdgeListWriter(" ", 0, 0).write(g, "../../data/test/FF_10k-20k_t" + str(i) + ".in")
+    graphio.EdgeListWriter(" ", 0, 0).write(g, "../../data/training/FF_10k-20k_t" + str(i) + ".in")

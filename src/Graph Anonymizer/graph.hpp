@@ -6,6 +6,7 @@
 #define TRAINING_DIR "../../data/training/"
 #define TEST_DIR "../../data/test/"
 #define DATA_SET "FF_10k-20k_t"
+//#define DATA_SET "COSTUM_"
 
 #include <unordered_map>
 #include <vector>
@@ -74,6 +75,8 @@ class Graph {
         void pred_fcap(FeatureSet& f, int n0, int n1);
         int bfs(int s, int g);
         void write_features(bool training);
+        bool read_predictions();
+        void add_pred_edge(int from, int to);
 
         vector<vector<int>> adj;
         vector<FeatureSet> f_list;
