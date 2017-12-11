@@ -34,9 +34,13 @@ void Graph::train_rfc(){
         + to_string(1) 
         + ".in";
     add_edges_from_file(file_name_0.c_str());
+    cout << "t0: " << node_count << endl;
+    cout << "t0: " << edge_count << endl;
     vector<FeatureSet> f_list;
     extract_features(f_list);
     add_edges_from_file(file_name_1.c_str());
+    cout << "t1: " << node_count << endl;
+    cout << "t1: " << edge_count << endl;
     add_labels(f_list);
     create_rfc(f_list);
 
@@ -114,10 +118,11 @@ bool Graph::update(){
         + ".in";
     if (!add_edges_from_file(cur_file_name.c_str()))
         return false;
-    //vector<FeatureSet> f_list; 
-    //extract_features(f_list);
-    //test_features(f_list);
-    //f_list.clear();
+    vector<FeatureSet> f_list; 
+    extract_features(f_list);
+    test_features(f_list);
+    f_list.clear();
+    //print_pred_edges();
     assign_groups();
     pred.clear();
     time++;
@@ -126,6 +131,7 @@ bool Graph::update(){
 
 
 void Graph::test_features(vector<FeatureSet> f_list){
+    pred.resize(adj.size());
     ifstream f_in;
     f_in.open("../../data/rfc/tree.in", ios::in);
     dfunserialize(f_in, df);
@@ -147,8 +153,11 @@ void Graph::test_features(vector<FeatureSet> f_list){
         line += "]";
         x = line.c_str();
         dfprocess(df, x, y);
+        //cout << y.tostring(2);
         if (y[0] < 0.5){
+            cout << "pred: " << f_list[i].n0 << ", " << f_list[i].n1 << endl;
             add_pred_edge(f_list[i].n0, f_list[i].n1);
+            add_pred_edge(f_list[i].n1, f_list[i].n0);
         }
     }
 
@@ -324,6 +333,17 @@ void Graph::print_edges(){
 }
 
 
+void Graph::print_pred_edges(){
+    for (int i = 0; i < (int)pred.size(); i++){
+        cout << i << ": ";
+        for (int j = 0; j < (int)pred[i].size(); j++){
+            cout << pred[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+
 void Graph::print_groups(){
     cout << "There are " << group_list.size() << " groups." << endl;
     for (int i = 0; i < (int)group_list.size(); i++){
@@ -414,7 +434,7 @@ bool Graph::group_density(Group s1){
         }
     }
     for (int i = 0; i < (int)connected_groups.size(); i++){
-        if (edge_identification(s1, group_list[connected_groups[i]], false) > MIN_PRIVACY)
+        if (edge_identification(s1, group_list[connected_groups[i]], true) > MIN_PRIVACY)
             return false;
     }
     return true;
@@ -468,7 +488,6 @@ void Graph::assign_groups(){
             }
         }
     }
-    //TODO: divide nodes of new_groups over full_groups
     int c = 0;
     int node;
     for (int i = 0; i < (int)new_groups.size(); i++){
@@ -488,7 +507,7 @@ void Graph::assign_groups(){
     group_list.resize(group_count);
     new_groups.clear();
     full_groups.clear();
-    //TODO: remove empty groups
+
     for (int i = 0; i < (int)group_list.size(); i++){
         if (group_list[i].nodes.empty()){
             for (int j = i + 1; j < (int)group_list.size(); j++){
@@ -510,6 +529,7 @@ void Graph::assign_groups(){
             c++;
     }
     group_list.erase(group_list.end() - c, group_list.end());
+    group_count = (int)group_list.size();
 }
 
 

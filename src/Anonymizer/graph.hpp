@@ -5,7 +5,9 @@
 #define MIN_PRIVACY 3.0 / (GROUP_SIZE * GROUP_SIZE)
 #define TRAINING_DIR "../../data/training/"
 #define TEST_DIR "../../data/test/"
-#define DATA_SET "FF_10k-20k_t"
+//#define DATA_SET "FF_10k-20k_t"
+#define DATA_SET "FF_1k-2k_new_t"
+//#define DATA_SET "FF_1k-2k_t"
 //#define DATA_SET "COSTUM_"
 
 
@@ -17,20 +19,17 @@
 #include <fstream>
 #include <string>
 
+
 using namespace alglib;
 using namespace std;
 
 
-/*  TODO: final stage of grouping
- *  TODO: run experiments
- *  
- *
- *  TODO: generate smaller test set...
- *
- *
- *
- *
- */
+ /* 
+  * 
+  * TODO: data set does not create old-old edges...
+  *
+  * TODO: run experiments
+  */
 
 
 
@@ -59,6 +58,7 @@ class Graph {
 
         bool update();
         void print_edges();
+        void print_pred_edges();
         void print_groups();
         void train_rfc();
         float edge_identification();
