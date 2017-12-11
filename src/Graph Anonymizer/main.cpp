@@ -12,12 +12,12 @@ int main (int argc, char* argv[]){
         cout << argv[1] << endl;
     }
     g = new Graph();
-    g->generate_trainingdata();
-    delete g;
+    //g->train_rfc();
 
-    g = new Graph();
     while(g->update()){
         g->print_groups();
+        cout << "NG: " << g->node_group_density() << endl;
+        cout << "EI: " << g->edge_identification() << endl;
         break;
         //do some statistic analysis
     }

@@ -10,8 +10,6 @@
 #include "dataanalysis.h"
 #include "graph.hpp"
 
-
-using namespace alglib;
 using namespace std;
 
 
@@ -24,7 +22,7 @@ Graph::Graph(){
 
 
 
-void Graph::train_rfc(){
+void Graph::generate_trainingdata(){
     string file_name_0 = string(TRAINING_DIR) 
         + string(DATA_SET) 
         + to_string(0) 
@@ -34,14 +32,13 @@ void Graph::train_rfc(){
         + to_string(1) 
         + ".in";
     add_edges_from_file(file_name_0.c_str());
-    vector<FeatureSet> f_list;
-    extract_features(f_list);
+    extract_features();
     add_edges_from_file(file_name_1.c_str());
-    add_labels(f_list);
-    create_rfc(f_list);
-
+    add_labels();
+    write_features(true);
     //clear all datastructures
     adj.clear();
+    f_list.clear();
     pred.clear();
     ungrouped.clear();
     name_id_mapping.clear();
@@ -56,46 +53,7 @@ void Graph::train_rfc(){
 }
 
 
-void Graph::create_rfc(vector<FeatureSet>& f_list){
-    cout << "training classifier" << endl;
-    string content;
-    content = "[";
-    for (int i = 0; i < (int)f_list.size(); i++){
-        content += "[";
-        content += to_string(f_list[i].foaf);
-        content += ",";
-        content += to_string(f_list[i].cn);
-        content += ",";
-        content += to_string(f_list[i].aa);
-        content += ",";
-        content += to_string(f_list[i].pa);
-        content += ",";
-        content += to_string(f_list[i].d);
-        content += ",";
-        content += to_string(f_list[i].label);
-        content += "]";
-        content += ",";
-    }
-    content.pop_back();
-    content += "]";
-    real_2d_array xy;
-    xy = content.c_str();
-    dfreport rep;
-    ae_int_t info;
-    const ae_int_t npoints = f_list.size();
-    const ae_int_t nvars = 5;
-    f_list.clear();
-    dfbuildrandomdecisionforest(xy, npoints, nvars, 2, 10, 0.3, info, df, rep);
-    cout << "done!" << endl;
-    string df_s;
-    ofstream f_out;
-    f_out.open("../../data/rfc/tree.in", ios::out);
-    dfserialize(df, f_out);
-    f_out.close();
-}
-
-
-void Graph::add_labels(vector<FeatureSet>& f_list){
+void Graph::add_labels(){
     for (int i = 0; i < (int)f_list.size(); i++){
         f_list[i].label = edge_exists(f_list[i].n0, f_list[i].n1);
     }
@@ -114,44 +72,17 @@ bool Graph::update(){
         + ".in";
     if (!add_edges_from_file(cur_file_name.c_str()))
         return false;
-    //vector<FeatureSet> f_list; 
-    //extract_features(f_list);
-    //test_features(f_list);
-    //f_list.clear();
+    extract_features();
+    write_features(false);
+    //wait for user input when RFC finished
+    int go;
+    cout << "input number when RFC finished" << endl;
+    cin >> go;
+    read_predictions();
     assign_groups();
     pred.clear();
     time++;
     return true;
-}
-
-
-void Graph::test_features(vector<FeatureSet> f_list){
-    ifstream f_in;
-    f_in.open("../../data/rfc/tree.in", ios::in);
-    dfunserialize(f_in, df);
-    f_in.close();
-    string line;
-    real_1d_array x;
-    real_1d_array y;
-    for (int i = 0; i < (int)f_list.size(); i++){
-        line = "[";
-        line += to_string(f_list[i].foaf);
-        line += ",";
-        line += to_string(f_list[i].cn);
-        line += ",";
-        line += to_string(f_list[i].aa);
-        line += ",";
-        line += to_string(f_list[i].pa);
-        line += ",";
-        line += to_string(f_list[i].d);
-        line += "]";
-        x = line.c_str();
-        dfprocess(df, x, y);
-        if (y[0] < 0.5){
-            add_pred_edge(f_list[i].n0, f_list[i].n1);
-        }
-    }
-
 }
 
 
@@ -165,52 +96,66 @@ void Graph::add_pred_edge(int from, int to){
 }
 
 
-float Graph::edge_identification(){
-    float ei = 0;
-    int comb = 0;
-    for (int i = 0; i < (int)group_list.size(); i++){
-        for (int j = i + 1; j < (int)group_list.size(); j++){
-            ei += edge_identification(group_list[i], group_list[j], false);
-            comb++;
+bool Graph::read_predictions(){
+    ifstream fin;
+    string file_name;
+    string line;
+    int from_id, to_id;
+    file_name = string(TEST_DIR) + "predicted_edges.in";
+    fin.open(file_name.c_str(), ios::in);
+    if (fin.is_open()){
+        cout << "reading from: " << file_name << endl;
+        while (!fin.eof()){
+            fin >> from_id >> to_id;
+
+            add_pred_edge(from_id, to_id);
+            add_pred_edge(to_id, from_id);
         }
+        fin.close();
+        return true;
+    } else {
+        cout << "File does not exist!" << endl;
+        return false;
     }
-    return ei/comb;
 }
 
 
-float Graph::node_group_density(){
-    float ng = 0.0;
-    for (int i = 0; i < (int)adj.size(); i++){
-        ng += node_group_density(i);
+void Graph::write_features(bool training){
+    ofstream fout;
+    string file_name;
+    string line;
+    if (training){
+        file_name = string(TRAINING_DIR)
+            + "labeled_features.in";
+        fout.open(file_name.c_str(), ios::out);
+    } else {
+        file_name = string(TEST_DIR)
+            + "unlabeled_features.in";
+        fout.open(file_name.c_str(), ios::out);
     }
-    return ng / (int)adj.size();
-}
-
-
-float Graph::node_group_density(int n0){
-    float m = 0.0;
-    int gid;
-    Group S;
-    for (int i = 0; i < (int)adj[n0].size(); i++){
-        gid = node_group_mapping[adj[n0][i]];
-        S = group_list[gid];
-        m = max(m, node_group_density(n0, S));
-    }
-    return m;
-}
-
-
-float Graph::node_group_density(int n0, Group S){
-    int count = 0;
-    for (int i = 0; i < (int)adj[n0].size(); i++){
-        if (find(S.nodes.begin(), S.nodes.end(), adj[n0][i]) != S.nodes.end()){
-            count++;
+    if (fout.is_open()){
+        cout << "Writing features to: " << file_name << endl;
+        for (int i = 0; i < (int)f_list.size(); i++){
+            line.clear();
+            line += to_string(f_list[i].n0) ;
+            line += ", " + to_string(f_list[i].n1); 
+            line += ", " + to_string(f_list[i].foaf);
+            line += ", " + to_string(f_list[i].cn);
+            line += ", " + to_string(f_list[i].aa);
+            line += ", " + to_string(f_list[i].pa);
+            line += ", " + to_string(f_list[i].d);
+            if (training){
+                line += ", " + to_string(f_list[i].label);
+            }
+            line += "\n";
+            fout << line;
         }
+        fout.close();
     }
-    return (float)count / S.nodes.size();
 }
 
-void Graph::extract_features(vector<FeatureSet>& f_list){
+
+void Graph::extract_features(){
     cout << "Extracting features..." << endl;
     FeatureSet f;
     float progress = 0;
@@ -372,31 +317,21 @@ bool Graph::add_edge(int from, int to){
 }
 
 
-bool Graph::search(vector<int> x, int y){
-    for (int i = 0; i < (int)x.size(); i++){
-        if (x[i] == y){
-            return true;
-        }
-    }
-    return false;
-}
-
-
 float Graph::edge_identification(Group s1, Group s2, bool pr){
     int connections = 0;
     for (int i = 0; i < (int)s1.nodes.size(); i++){
-        for (int j = 0; j < (int)s2.nodes.size(); j++){
+        for (int j = 0; j < (int)s2.nodes.size(); i++){
             if (node_group_mapping[s2.nodes[j]] != -1){
-                if(search(adj[s1.nodes[i]], s2.nodes[j])){
+
+                if(find(adj[s1.nodes[i]].begin(), adj[s1.nodes[i]].end(), s2.nodes[j]) != adj[s1.nodes[i]].end()){
                     connections++;
-                } else if (pr && search(pred[s1.nodes[i]], s2.nodes[j])){
+                } else if (pr && find(pred[s1.nodes[i]].begin(), pred[s1.nodes[i]].end(), s2.nodes[j]) != pred[s1.nodes[i]].end()){
                     connections++;
                 }
             }
         }
     }
-    float ret = ((float)connections / 2) / (s1.nodes.size() * s2.nodes.size());
-    return ret;
+    return (connections / 2) / (s1.nodes.size() * s2.nodes.size());
 }
 
 
@@ -407,14 +342,15 @@ bool Graph::group_density(Group s1){
     int group_nr;
     for (int i = 0; i < (int)s1.nodes.size(); i++){
         for (int j = 0; j < (int)adj[s1.nodes[i]].size(); j++){
-            group_nr = node_group_mapping[adj[s1.nodes[i]][j]];
-            if (group_nr != -1 && !search(connected_groups, group_nr)){
+            group_nr = adj[s1.nodes[i]][j];
+            if (group_nr != -1
+            && find(connected_groups.begin(), connected_groups.end(), group_nr) != connected_groups.end()){
                     connected_groups.push_back(group_nr);
             }
         }
     }
     for (int i = 0; i < (int)connected_groups.size(); i++){
-        if (edge_identification(s1, group_list[connected_groups[i]], false) > MIN_PRIVACY)
+        if (edge_identification(s1, group_list[connected_groups[i]], true) < MIN_PRIVACY)
             return false;
     }
     return true;
@@ -422,8 +358,6 @@ bool Graph::group_density(Group s1){
 
 
 void Graph::assign_groups(){
-    group_list.resize(node_count);
-    node_group_mapping.resize(node_count, -1);
     vector<Group> new_groups;
     vector<Group> full_groups;
     Group g;
@@ -438,15 +372,15 @@ void Graph::assign_groups(){
             g.nodes.clear();
             g.nodes.push_back(cur);
             new_groups.push_back(g);
+            if ((int)node_group_mapping.size() < cur)
+                node_group_mapping.resize(cur);
             node_group_mapping[cur] = g.id;
-            group_list[g.id] = g;
             group_count++;
         } else { 
             for (int i = 0; i < (int)new_groups.size() && !found; i++){
                 new_groups[i].nodes.push_back(cur);
-                node_group_mapping[cur] = new_groups[i].id;
+                node_group_mapping.push_back(new_groups[i].id);
                 if (group_density(new_groups[i])){
-                    group_list[new_groups[i].id] = new_groups[i];
                     if (new_groups[i].nodes.size() >= GROUP_SIZE){
                         g = new_groups[i];
                         full_groups.push_back(g);
@@ -462,54 +396,23 @@ void Graph::assign_groups(){
                 g.nodes.clear();
                 g.nodes.push_back(cur);
                 new_groups.push_back(g);
-                node_group_mapping[cur] = g.id;
-                group_list[g.id] = g;
+                node_group_mapping.push_back(g.id);
                 group_count++;
             }
         }
     }
     //TODO: divide nodes of new_groups over full_groups
-    int c = 0;
-    int node;
+
+
     for (int i = 0; i < (int)new_groups.size(); i++){
-        for (int j = 0; j < (int)new_groups[i].nodes.size(); j++){
-            node = new_groups[i].nodes[j];
-            full_groups[c % (int)full_groups.size()].nodes.push_back(node);
-            node_group_mapping[node] = full_groups[c % (int)full_groups.size()].id;
-            c++;
-        }
-        group_list[new_groups[i].id].nodes.clear();
+        g = new_groups[i];
+        group_list.push_back(g);
     }
 
     for (int i = 0; i < (int)full_groups.size(); i++){
         g = full_groups[i];
-        group_list[g.id] = g;
+        group_list.push_back(g);
     }
-    group_list.resize(group_count);
-    new_groups.clear();
-    full_groups.clear();
-    //TODO: remove empty groups
-    for (int i = 0; i < (int)group_list.size(); i++){
-        if (group_list[i].nodes.empty()){
-            for (int j = i + 1; j < (int)group_list.size(); j++){
-                if (!group_list[j].nodes.empty()){
-                    group_list[i] = group_list[j];
-                    group_list[j].nodes.clear();
-                    break;
-                }
-            }
-        }
-    }
-    c = 0;
-    for (int i = 0; i < (int)group_list.size(); i++){
-        group_list[i].id = i;
-        for (int j = 0; j < (int)group_list[i].nodes.size(); j++){
-            node_group_mapping[group_list[i].nodes[j]] = group_list[i].id;
-        }
-        if(group_list[i].nodes.empty())
-            c++;
-    }
-    group_list.erase(group_list.end() - c, group_list.end());
 }
 
 
