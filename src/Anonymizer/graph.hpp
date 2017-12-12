@@ -2,13 +2,14 @@
 #define VAR_GRAPH_H
 
 #define GROUP_SIZE 10
-#define MIN_PRIVACY 3.0 / (GROUP_SIZE * GROUP_SIZE)
+#define MIN_PRIVACY 5.0 / (GROUP_SIZE * GROUP_SIZE)
 #define TRAINING_DIR "../../data/training/"
 #define TEST_DIR "../../data/test/"
 //#define DATA_SET "FF_10k-20k_t"
 #define DATA_SET "FF_1k-2k_new_t"
 //#define DATA_SET "FF_1k-2k_t"
 //#define DATA_SET "COSTUM_"
+#define P_CHANCE 0.5
 
 
 #include "dataanalysis.h"
@@ -26,7 +27,10 @@ using namespace std;
 
  /* 
   * 
-  * TODO: data set does not create old-old edges...
+  * TODO: data set is not consistent in its growth
+  * meaning: since growth is random two graphs at different timesteps have same structure
+  * but no exact correspondence between nodes
+  * 
   *
   * TODO: run experiments
   */
@@ -47,6 +51,7 @@ struct FeatureSet {
     int cn;
     float aa;
     int pa;
+    float jc;
     int d;
     bool label;
 };
@@ -78,6 +83,7 @@ class Graph {
         void add_labels(vector<FeatureSet>& f_list);
         bool group_density(Group s1);
         void pred_fcap(FeatureSet& f, int n0, int n1);
+        float pred_jaccard(int n0, int n1);
         int bfs(int s, int g);
         void add_pred_edge(int from, int to);
         void create_rfc(vector<FeatureSet>& f_list);

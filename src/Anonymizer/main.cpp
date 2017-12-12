@@ -16,8 +16,8 @@ int main (int argc, char* argv[]){
 
     while(g->update()){
         //g->print_groups();
-        cout << "NG: " << g->node_group_density() << endl;
-        cout << "EI: " << g->edge_identification() << endl;
+        cout << g->node_group_density() << " ";
+        cout << g->edge_identification() << endl;
     //    break;
     }
     delete g;

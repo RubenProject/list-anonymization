@@ -1,0 +1,65 @@
+-------------------------------------------------------------
+dataset: Forest Fire 1k to 1.8k
+increments: 11
+method: union
+grouping restriction: 5 / k2
+training: 0 -> 1
+P: 0.5
+
+time    node    edge    group       NG          EI
+0       1000    2846    91          0.0965916   0.00142777
+1       1100    6046    101         0.107199    0.00247833
+2       1200    9354    111         0.119107    0.00318157
+3       1300    12976   121         0.130309    0.00372562
+4       1400    16694   131         0.140275    0.00410432
+5       1500    20618   141         0.14736     0.00438969
+6       1600    24948   151         0.152054    0.0046478
+7       1700    29548   161         0.159008    0.00485561
+8       1800    34382   171         0.164059    0.00502343
+
+
+-------------------------------------------------------------
+dataset: Forest Fire 1k to 2k
+increments: 11
+method: union
+grouping restriction: 4 / k2
+training: 0 -> 1
+P: 0.5
+
+time    node    edge    group       NG          EI
+
+
+-------------------------------------------------------------
+dataset: Forest Fire 1k to 2k
+increments: 11
+method: union
+grouping restriction: 3 / k2
+training: 0 -> 1
+P: 0.5
+
+time    node    edge    group       NG          EI
+
+
+-------------------------------------------------------------
+dataset: Forest Fire 1k to 2k
+increments: 11
+method: union
+grouping restriction: 2 / k2
+training: 0 -> 1
+P: 0.5
+
+time    node    edge    group       NG          EI
+
+
+
+-------------------------------------------------------------
+dataset: Forest Fire 1k to 2k
+increments: 11
+method: union
+grouping restriction: 1 / k2
+training: 0 -> 1
+P: 0.5
+
+time    node    edge    group       NG          EI
+
+

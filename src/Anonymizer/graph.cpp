@@ -74,6 +74,8 @@ void Graph::create_rfc(vector<FeatureSet>& f_list){
         content += ",";
         content += to_string(f_list[i].pa);
         content += ",";
+        content += to_string(f_list[i].jc);
+        content += ",";
         content += to_string(f_list[i].d);
         content += ",";
         content += to_string(f_list[i].label);
@@ -87,7 +89,7 @@ void Graph::create_rfc(vector<FeatureSet>& f_list){
     dfreport rep;
     ae_int_t info;
     const ae_int_t npoints = f_list.size();
-    const ae_int_t nvars = 5;
+    const ae_int_t nvars = 6;
     f_list.clear();
     dfbuildrandomdecisionforest(xy, npoints, nvars, 2, 10, 0.3, info, df, rep);
     cout << "done!" << endl;
@@ -124,6 +126,10 @@ bool Graph::update(){
     f_list.clear();
     //print_pred_edges();
     assign_groups();
+    cout << time << " ";
+    cout << node_count << " ";
+    cout << edge_count << " ";
+    cout << group_count << " ";
     pred.clear();
     time++;
     return true;
@@ -149,13 +155,15 @@ void Graph::test_features(vector<FeatureSet> f_list){
         line += ",";
         line += to_string(f_list[i].pa);
         line += ",";
+        line += to_string(f_list[i].jc);
+        line += ",";
         line += to_string(f_list[i].d);
         line += "]";
         x = line.c_str();
         dfprocess(df, x, y);
         //cout << y.tostring(2);
-        if (y[0] < 0.5){
-            cout << "pred: " << f_list[i].n0 << ", " << f_list[i].n1 << endl;
+        if (y[0] < P_CHANCE){
+            //cout << "pred: " << f_list[i].n0 << ", " << f_list[i].n1 << endl;
             add_pred_edge(f_list[i].n0, f_list[i].n1);
             add_pred_edge(f_list[i].n1, f_list[i].n0);
         }
@@ -234,9 +242,10 @@ void Graph::extract_features(vector<FeatureSet>& f_list){
                 if (f.foaf) {
                     f.d = 2;
                 }else{
-                    //f.d = bfs(i, j);
-                    f.d = -1;
+                    f.d = bfs(i, j);
+                    //f.d = -1;
                 }
+                f.jc = pred_jaccard(i, j);
                 f_list.push_back(f);
             }
         }
@@ -319,6 +328,21 @@ void Graph::pred_fcap(FeatureSet& f, int n0, int n1){
     f.cn = cn;
     f.aa = aa;
     f.pa = adj[n0].size() * adj[n1].size();
+}
+
+
+float Graph::pred_jaccard(int n0, int n1){
+    int int_size = 0;
+    int un_size = (int)(adj[n0].size() + adj[n1].size());
+    for ( int i = 0; i < (int)adj[n0].size(); i++){
+        for ( int j = 0; j < (int)adj[n1].size(); j++){
+            if (adj[n0][i] == adj[n1][j]){
+                int_size++;
+                un_size--;
+            }
+        }
+    }
+    return (float)int_size / un_size;
 }
 
 
@@ -434,7 +458,7 @@ bool Graph::group_density(Group s1){
         }
     }
     for (int i = 0; i < (int)connected_groups.size(); i++){
-        if (edge_identification(s1, group_list[connected_groups[i]], true) > MIN_PRIVACY)
+        if (edge_identification(s1, group_list[connected_groups[i]], false) > MIN_PRIVACY)
             return false;
     }
     return true;
