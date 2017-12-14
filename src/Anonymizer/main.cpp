@@ -12,13 +12,16 @@ int main (int argc, char* argv[]){
         cout << argv[1] << endl;
     }
     g = new Graph();
-    g->train_rfc();
-
+    //g->train_rfc();
+    
+    int i = 0;
     while(g->update()){
         //g->print_groups();
         cout << g->node_group_density() << " ";
         cout << g->edge_identification() << endl;
-    //    break;
+        if (i == 6)        
+            break;
+        i++;
     }
     delete g;
 

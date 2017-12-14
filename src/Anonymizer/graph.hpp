@@ -2,14 +2,15 @@
 #define VAR_GRAPH_H
 
 #define GROUP_SIZE 10
-#define MIN_PRIVACY 5.0 / (GROUP_SIZE * GROUP_SIZE)
+#define MIN_PRIVACY 3.0 / (GROUP_SIZE * GROUP_SIZE)
 #define TRAINING_DIR "../../data/training/"
 #define TEST_DIR "../../data/test/"
 //#define DATA_SET "FF_10k-20k_t"
-#define DATA_SET "FF_1k-2k_new_t"
+//#define DATA_SET "FF_1k-2k_new_t"
 //#define DATA_SET "FF_1k-2k_t"
 //#define DATA_SET "COSTUM_"
-#define P_CHANCE 0.5
+#define DATA_SET "MY_DATA_t"
+#define P_CHANCE 0.1
 
 
 #include "dataanalysis.h"

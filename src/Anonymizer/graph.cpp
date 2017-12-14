@@ -33,14 +33,34 @@ void Graph::train_rfc(){
         + string(DATA_SET) 
         + to_string(1) 
         + ".in";
+    string file_name_2 = string(TRAINING_DIR) 
+        + string(DATA_SET) 
+        + to_string(2) 
+        + ".in";
+    string file_name_3 = string(TRAINING_DIR) 
+        + string(DATA_SET) 
+        + to_string(3) 
+        + ".in";
+    string file_name_4 = string(TRAINING_DIR) 
+        + string(DATA_SET) 
+        + to_string(4) 
+        + ".in";
+    string file_name_5 = string(TRAINING_DIR) 
+        + string(DATA_SET) 
+        + to_string(5) 
+        + ".in";
     add_edges_from_file(file_name_0.c_str());
     cout << "t0: " << node_count << endl;
     cout << "t0: " << edge_count << endl;
     vector<FeatureSet> f_list;
     extract_features(f_list);
     add_edges_from_file(file_name_1.c_str());
-    cout << "t1: " << node_count << endl;
-    cout << "t1: " << edge_count << endl;
+    add_edges_from_file(file_name_2.c_str());
+    add_edges_from_file(file_name_3.c_str());
+    add_edges_from_file(file_name_4.c_str());
+    add_edges_from_file(file_name_5.c_str());
+    cout << "t5: " << node_count << endl;
+    cout << "t5: " << edge_count << endl;
     add_labels(f_list);
     create_rfc(f_list);
 
@@ -92,7 +112,7 @@ void Graph::create_rfc(vector<FeatureSet>& f_list){
     const ae_int_t nvars = 6;
     f_list.clear();
     dfbuildrandomdecisionforest(xy, npoints, nvars, 2, 10, 0.3, info, df, rep);
-    cout << "done!" << endl;
+    cout << "done!" << info << endl;
     string df_s;
     ofstream f_out;
     f_out.open("../../data/rfc/tree.in", ios::out);
@@ -161,8 +181,7 @@ void Graph::test_features(vector<FeatureSet> f_list){
         line += "]";
         x = line.c_str();
         dfprocess(df, x, y);
-        //cout << y.tostring(2);
-        if (y[0] < P_CHANCE){
+        if (y[1] >= P_CHANCE){
             //cout << "pred: " << f_list[i].n0 << ", " << f_list[i].n1 << endl;
             add_pred_edge(f_list[i].n0, f_list[i].n1);
             add_pred_edge(f_list[i].n1, f_list[i].n0);
@@ -456,9 +475,15 @@ bool Graph::group_density(Group s1){
                     connected_groups.push_back(group_nr);
             }
         }
+        for (int j = 0; j < (int)pred[s1.nodes[i]].size(); j++){
+            group_nr = node_group_mapping[pred[s1.nodes[i]][j]];
+            if (group_nr != -1 && !search(connected_groups, group_nr)){
+                    connected_groups.push_back(group_nr);
+            }
+        }
     }
     for (int i = 0; i < (int)connected_groups.size(); i++){
-        if (edge_identification(s1, group_list[connected_groups[i]], false) > MIN_PRIVACY)
+        if (edge_identification(s1, group_list[connected_groups[i]], true) > MIN_PRIVACY)
             return false;
     }
     return true;

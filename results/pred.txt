@@ -1,65 +1,69 @@
 -------------------------------------------------------------
-dataset: Forest Fire 1k to 1.8k
+dataset: Forest Fire 1k to 1.5k
 increments: 11
 method: union
 grouping restriction: 5 / k2
-training: 0 -> 1
+training: 0 -> 0 U 1 U 2 U 3 U 4 U 5
 P: 0.5
 
 time    node    edge    group       NG          EI
-0       1000    2846    91          0.0965916   0.00142777
-1       1100    6046    101         0.107199    0.00247833
-2       1200    9354    111         0.119107    0.00318157
-3       1300    12976   121         0.130309    0.00372562
-4       1400    16694   131         0.140275    0.00410432
-5       1500    20618   141         0.14736     0.00438969
-6       1600    24948   151         0.152054    0.0046478
-7       1700    29548   161         0.159008    0.00485561
-8       1800    34382   171         0.164059    0.00502343
-
+0 1000 2846 91 0.0969552 0.00142576
+1 1100 6046 101 0.107274 0.00247669
+2 1200 9354 111 0.11894 0.00318022
+3 1300 12976 121 0.129722 0.00372391
+4 1400 16694 130 0.139244 0.00415787
+5 1500 20618 140 0.146441 0.00443629
 
 -------------------------------------------------------------
-dataset: Forest Fire 1k to 2k
-increments: 11
-method: union
-grouping restriction: 4 / k2
-training: 0 -> 1
-P: 0.5
-
-time    node    edge    group       NG          EI
-
-
--------------------------------------------------------------
-dataset: Forest Fire 1k to 2k
+dataset: Forest Fire 1k to 1.5k
 increments: 11
 method: union
 grouping restriction: 3 / k2
-training: 0 -> 1
+training: 0 -> 0 U 1 U 2 U 3 U 4 U 5
+P: 0.3
+
+time    node    edge    group       NG          EI
+0 1000 2846 89 0.0957659 0.00142738
+1 1100 6046 98 0.105972 0.00250641
+2 1200 9354 108 0.116485 0.00320572
+3 1300 12976 118 0.127304 0.0037446
+4 1400 16694 128 0.136566 0.00411387
+5 1500 20618 138 0.144413 0.00438884
+
+-------------------------------------------------------------
+dataset: Forest Fire 1k to 1.5k
+increments: 11
+method: union
+grouping restriction: 3 / k2
+training: 0 -> 0 U 1 U 2 U 3 U 4 U 5
 P: 0.5
 
 time    node    edge    group       NG          EI
+0       1000    2846    88          0.0944325   0.00143103
+1       1100    6046    97          0.104464    0.0025108
+2       1200    9354    107         0.114828    0.00320989
+3       1300    12976   116         0.124938    0.00380368
+4       1400    16694   125         0.132336    0.00422016
+5       1500    20618   134         0.140594    0.00453711
 
 
 -------------------------------------------------------------
-dataset: Forest Fire 1k to 2k
+dataset: Forest Fire 1k to 1.5k
 increments: 11
 method: union
-grouping restriction: 2 / k2
-training: 0 -> 1
-P: 0.5
+grouping restriction: 3 / k2
+training: 0 -> 0 U 1 U 2 U 3 U 4 U 5
+P: 0.7
 
 time    node    edge    group       NG          EI
+0 1000 2846 88 0.0944325 0.00143103
+1 1100 6046 97 0.104464 0.00251101
+2 1200 9354 106 0.114086 0.00325936
+3 1300 12976 115 0.123818 0.00385022
 
 
 
--------------------------------------------------------------
-dataset: Forest Fire 1k to 2k
-increments: 11
-method: union
-grouping restriction: 1 / k2
-training: 0 -> 1
-P: 0.5
 
-time    node    edge    group       NG          EI
+
 
 

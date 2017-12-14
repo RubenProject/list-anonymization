@@ -1,0 +1,38 @@
+reading from: ../../data/test/MY_DATA_t0.in
+Extracting features...
+11%
+22%
+33%
+44%
+55%
+66%
+77%
+88%
+99%
+0 837 1808 12 0.0166442 0.00131478
+reading from: ../../data/test/MY_DATA_t1.in
+Extracting features...
+11%
+22%
+33%
+44%
+55%
+66%
+77%
+88%
+99%
+1 968 2190 18 0.0219188 0.00106117
+reading from: ../../data/test/MY_DATA_t2.in
+Extracting features...
+11%
+22%
+33%
+44%
+55%
+66%
+77%
+88%
+99%
+2 1107 2606 23 0.0245242 0.000905945
+reading from: ../../data/test/MY_DATA_t3.in
+Extracting features...

@@ -1,0 +1,79 @@
+----------------------------------------------------
+Network Properties for:		G#6
+nodes, edges			1500, 2172
+directed?			False
+weighted?			False
+isolated nodes			0
+self-loops			0
+density				0.001932
+clustering coefficient		0.289434
+min/max/avg degree		1, 25, 2.896000
+degree assortativity		0.404733
+number of connected components	1
+size of largest component	1500 (100.00 %)
+----------------------------------------------------
+Network Properties for:		G#6
+nodes, edges			1425, 1881
+directed?			False
+weighted?			False
+isolated nodes			128
+self-loops			0
+density				0.001854
+clustering coefficient		0.244633
+min/max/avg degree		0, 25, 2.640000
+degree assortativity		0.396988
+number of connected components	81
+size of largest component	1254 (88.00 %)
+----------------------------------------------------
+Network Properties for:		G#6
+nodes, edges			1343, 1632
+directed?			False
+weighted?			False
+isolated nodes			271
+self-loops			0
+density				0.001811
+clustering coefficient		0.219653
+min/max/avg degree		0, 25, 2.430380
+degree assortativity		0.403311
+number of connected components	158
+size of largest component	1057 (78.70 %)
+----------------------------------------------------
+Network Properties for:		G#6
+nodes, edges			1258, 1393
+directed?			False
+weighted?			False
+isolated nodes			402
+self-loops			0
+density				0.001762
+clustering coefficient		0.200883
+min/max/avg degree		0, 23, 2.214626
+degree assortativity		0.397959
+number of connected components	230
+size of largest component	845 (67.17 %)
+----------------------------------------------------
+Network Properties for:		G#6
+nodes, edges			1159, 1185
+directed?			False
+weighted?			False
+isolated nodes			531
+self-loops			0
+density				0.001766
+clustering coefficient		0.177478
+min/max/avg degree		0, 22, 2.044866
+degree assortativity		0.418332
+number of connected components	275
+size of largest component	649 (56.00 %)
+----------------------------------------------------
+Network Properties for:		G#6
+nodes, edges			1062, 983
+directed?			False
+weighted?			False
+isolated nodes			659
+self-loops			0
+density				0.001745
+clustering coefficient		0.157835
+min/max/avg degree		0, 22, 1.851224
+degree assortativity		0.443159
+number of connected components	322
+size of largest component	482 (45.39 %)
+

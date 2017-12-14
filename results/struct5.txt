@@ -1,0 +1,9 @@
+set datafile separator ","
+set    xlabel 'time'
+set    ylabel 'average NG'
+plot 'temp_NG.csv' using 1:2 title 'P0.6' with lines,\
+    'temp_NG.csv' using 1:3 title 'P0.5' with lines, \
+    'temp_NG.csv' using 1:4 title 'P0.4' with lines, \
+    'temp_NG.csv' using 1:5 title 'P0.3' with lines, \
+    'temp_NG.csv' using 1:6 title 'P0.2' with lines, \
+    'temp_NG.csv' using 1:7 title 'P0.1' with lines
